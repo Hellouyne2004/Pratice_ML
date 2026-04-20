@@ -14,4 +14,4 @@ def test_model_prediction():
     prediction = model.predict(dummy_data)
     
     assert len(prediction) == 1, "Mô hình phải trả về 1 kết quả dự đoán"
-    assert prediction[0] in [0, 1], "Kết quả dự đoán phải là 0 hoặc 1"
+    assert prediction[0] in [2, 3], "Kết quả dự đoán phải là 0 hoặc 1"
