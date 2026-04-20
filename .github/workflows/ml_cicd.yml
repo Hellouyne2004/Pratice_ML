@@ -1,0 +1,66 @@
+name: ML CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Train Model
+        run: |
+          python train.py
+
+      - name: Test Model
+        run: |
+          pytest test_model.py -v
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ml-app:latest .
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Mock Deploy to Production
+        run: |
+          echo "Bắt đầu triển khai (Deploy)..."
+          echo "Kéo Docker image mới nhất..."
+          # docker pull myregistry/ml-app:latest
+          echo "Khởi động ứng dụng..."
+          # docker run -d -p 5000:5000 ml-app:latest
+          echo "Triển khai thành công!"
+
+  rollback:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Mock Rollback
+        run: |
+          echo "Quá trình triển khai gặp lỗi!"
+          echo "Thực hiện Rollback về phiên bản trước đó..."
+          # docker pull myregistry/ml-app:previous
+          # docker run -d -p 5000:5000 ml-app:previous
+          echo "Khôi phục hệ thống (Rollback) hoàn tất."
